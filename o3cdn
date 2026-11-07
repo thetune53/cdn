@@ -1,0 +1,686 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS CDN Analytics</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #0b1120;
+    color: #e5e7eb;
+    font-family: Inter, Arial, sans-serif;
+}
+
+.sidebar {
+    position: fixed;
+    width: 235px;
+    height: 100vh;
+    background: #111827;
+    padding: 25px 18px;
+    border-right: 1px solid #263247;
+}
+
+.logo {
+    font-size: 22px;
+    font-weight: 800;
+    color: #60a5fa;
+    margin-bottom: 45px;
+}
+
+.logo span {
+    color: white;
+}
+
+.menu-title {
+    font-size: 11px;
+    color: #64748b;
+    margin: 25px 10px 12px;
+    text-transform: uppercase;
+}
+
+.menu a {
+    display: block;
+    padding: 12px;
+    color: #94a3b8;
+    text-decoration: none;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.menu a:hover,
+.menu a.active {
+    background: #1e3a5f;
+    color: #60a5fa;
+}
+
+.main {
+    margin-left: 235px;
+    padding: 30px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    gap: 15px;
+}
+
+.header h1 {
+    font-size: 25px;
+}
+
+.subtitle {
+    color: #64748b;
+    font-size: 13px;
+    margin-top: 7px;
+}
+
+.status {
+    background: #064e3b;
+    color: #4ade80;
+    padding: 9px 15px;
+    border-radius: 20px;
+    font-size: 12px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 22px;
+}
+
+.card {
+    background: #111c2e;
+    border: 1px solid #25344b;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+.card-label {
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+.card-value {
+    font-size: 27px;
+    font-weight: 700;
+    margin: 15px 0 8px;
+}
+
+.green {
+    color: #4ade80;
+}
+
+.blue {
+    color: #60a5fa;
+}
+
+.yellow {
+    color: #fbbf24;
+}
+
+.red {
+    color: #f87171;
+}
+
+.change {
+    font-size: 12px;
+    color: #4ade80;
+}
+
+.section {
+    margin-bottom: 22px;
+}
+
+.section-title {
+    font-size: 16px;
+    margin-bottom: 18px;
+}
+
+.chart-card {
+    background: #111c2e;
+    border: 1px solid #25344b;
+    padding: 22px;
+    border-radius: 12px;
+    margin-bottom: 22px;
+}
+
+.chart-container {
+    height: 280px;
+    position: relative;
+}
+
+.two-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.interface {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px 0;
+    border-bottom: 1px solid #263247;
+    font-size: 13px;
+}
+
+.interface:last-child {
+    border: none;
+}
+
+.online {
+    color: #4ade80;
+}
+
+.progress {
+    width: 100%;
+    height: 7px;
+    background: #263247;
+    border-radius: 10px;
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+.progress div {
+    height: 100%;
+    background: #3b82f6;
+    border-radius: 10px;
+    transition: width .5s;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.table th,
+.table td {
+    padding: 15px 10px;
+    text-align: left;
+    border-bottom: 1px solid #263247;
+}
+
+.table th {
+    color: #64748b;
+    font-weight: 500;
+}
+
+.footer {
+    color: #64748b;
+    font-size: 12px;
+    padding: 20px 0;
+}
+
+@media(max-width: 1000px) {
+    .grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media(max-width: 700px) {
+    .sidebar {
+        position: static;
+        width: 100%;
+        height: auto;
+    }
+
+    .logo {
+        margin-bottom: 15px;
+    }
+
+    .main {
+        margin-left: 0;
+        padding: 18px;
+    }
+
+    .two-columns {
+        grid-template-columns: 1fr;
+    }
+
+    .header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<aside class="sidebar">
+
+    <div class="logo">NEXUS <span>CDN</span></div>
+
+    <div class="menu-title">Monitoring</div>
+
+    <nav class="menu">
+        <a href="#" class="active">◈ Dashboard</a>
+        <a href="#traffic">↗ Traffic Analytics</a>
+        <a href="#interfaces">⇄ Interfaces</a>
+        <a href="#resources">▣ System Resources</a>
+        <a href="#cache">◉ Cache Statistics</a>
+    </nav>
+
+    <div class="menu-title">Infrastructure</div>
+
+    <nav class="menu">
+        <a href="#servers">▤ Edge Servers</a>
+        <a href="#http">◈ HTTP Analytics</a>
+    </nav>
+
+</aside>
+
+<main class="main">
+
+    <header class="header">
+        <div>
+            <h1>CDN Dashboard</h1>
+            <div class="subtitle">
+                Infrastructure / Network Overview
+            </div>
+        </div>
+
+        <div class="status">
+            ● ALL SYSTEMS OPERATIONAL
+        </div>
+    </header>
+
+    <!-- MAIN STATISTICS -->
+
+    <div class="grid">
+
+        <div class="card">
+            <div class="card-label">Total Traffic</div>
+            <div class="card-value blue" id="trafficTotal">
+                18.42 TB
+            </div>
+            <div class="change">↑ 12.8% vs yesterday</div>
+        </div>
+
+        <div class="card">
+            <div class="card-label">Requests / sec</div>
+            <div class="card-value" id="requests">
+                24,891
+            </div>
+            <div class="change">↑ 8.4% vs yesterday</div>
+        </div>
+
+        <div class="card">
+            <div class="card-label">Cache Hit Ratio</div>
+            <div class="card-value green" id="cacheRatio">
+                96.8%
+            </div>
+            <div class="change">↑ 1.2% improvement</div>
+        </div>
+
+        <div class="card">
+            <div class="card-label">Average Latency</div>
+            <div class="card-value yellow" id="latency">
+                18 ms
+            </div>
+            <div class="change">↓ 3 ms improvement</div>
+        </div>
+
+    </div>
+
+    <!-- TRAFFIC CHART -->
+
+    <div class="chart-card" id="traffic">
+
+        <div class="section-title">
+            Network Traffic
+            <span style="float:right;color:#64748b;font-size:12px">
+                Mbps
+            </span>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="trafficChart"></canvas>
+        </div>
+
+    </div>
+
+    <div class="two-columns">
+
+        <!-- INTERFACES -->
+
+        <div class="card section" id="interfaces">
+
+            <div class="section-title">
+                Network Interfaces
+            </div>
+
+            <div class="interface">
+                <div>
+                    <b>ppp0</b>
+                    <div class="subtitle">WAN / Internet</div>
+                </div>
+                <div class="online">● UP</div>
+            </div>
+
+            <div class="interface">
+                <div>
+                    <b>br0</b>
+                    <div class="subtitle">192.168.1.1/24</div>
+                </div>
+                <div class="online">● UP</div>
+            </div>
+
+            <div class="interface">
+                <div>
+                    <b>br1</b>
+                    <div class="subtitle">10.1.30.1/24</div>
+                </div>
+                <div class="online">● UP</div>
+            </div>
+
+        </div>
+
+        <!-- RESOURCES -->
+
+        <div class="card section" id="resources">
+
+            <div class="section-title">
+                System Resources
+            </div>
+
+            <div>
+                <div class="interface">
+                    <b>CPU Usage</b>
+                    <span id="cpuValue">42%</span>
+                </div>
+                <div class="progress">
+                    <div id="cpuBar" style="width:42%"></div>
+                </div>
+            </div>
+
+            <div style="margin-top:20px">
+                <div class="interface">
+                    <b>RAM Usage</b>
+                    <span id="ramValue">68%</span>
+                </div>
+                <div class="progress">
+                    <div id="ramBar" style="width:68%"></div>
+                </div>
+            </div>
+
+            <div style="margin-top:20px">
+                <div class="interface">
+                    <b>Disk Usage</b>
+                    <span id="diskValue">54%</span>
+                </div>
+                <div class="progress">
+                    <div id="diskBar" style="width:54%"></div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- CACHE -->
+
+    <div class="two-columns">
+
+        <div class="card section" id="cache">
+
+            <div class="section-title">
+                Cache Statistics
+            </div>
+
+            <div class="interface">
+                <span>Cache HIT</span>
+                <b class="green" id="hit">96.8%</b>
+            </div>
+
+            <div class="interface">
+                <span>Cache MISS</span>
+                <b class="yellow" id="miss">3.2%</b>
+            </div>
+
+            <div class="interface">
+                <span>Cached Objects</span>
+                <b>1,284,921</b>
+            </div>
+
+        </div>
+
+        <!-- HTTP -->
+
+        <div class="card section" id="http">
+
+            <div class="section-title">
+                HTTP Response Codes
+            </div>
+
+            <div class="interface">
+                <span>200 OK</span>
+                <b class="green">92%</b>
+            </div>
+
+            <div class="interface">
+                <span>304 Not Modified</span>
+                <b class="blue">5%</b>
+            </div>
+
+            <div class="interface">
+                <span>404 Not Found</span>
+                <b class="yellow">2%</b>
+            </div>
+
+            <div class="interface">
+                <span>5xx Errors</span>
+                <b class="red">1%</b>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- SERVERS -->
+
+    <div class="card section" id="servers">
+
+        <div class="section-title">
+            CDN Edge Servers
+        </div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Location</th>
+                    <th>IP Address</th>
+                    <th>Status</th>
+                    <th>CPU</th>
+                    <th>Latency</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td>Almaty, KZ</td>
+                    <td>10.1.30.1</td>
+                    <td class="online">● Online</td>
+                    <td>42%</td>
+                    <td>2 ms</td>
+                </tr>
+
+                <tr>
+                    <td>Frankfurt, DE</td>
+                    <td>10.20.0.12</td>
+                    <td class="online">● Online</td>
+                    <td>67%</td>
+                    <td>48 ms</td>
+                </tr>
+
+                <tr>
+                    <td>Amsterdam, NL</td>
+                    <td>10.20.0.15</td>
+                    <td class="online">● Online</td>
+                    <td>31%</td>
+                    <td>52 ms</td>
+                </tr>
+
+                <tr>
+                    <td>Singapore, SG</td>
+                    <td>10.30.0.10</td>
+                    <td class="online">● Online</td>
+                    <td>84%</td>
+                    <td>91 ms</td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+
+    <div class="footer">
+        NEXUS CDN Analytics v1.0 |
+        Last update: <span id="lastUpdate">--:--:--</span>
+        | Demo Mode
+    </div>
+
+</main>
+
+<script>
+
+// TRAFFIC CHART
+
+const labels = Array.from(
+    {length: 24},
+    (_, i) => `${String(i).padStart(2, '0')}:00`
+);
+
+const incoming = labels.map(
+    () => Math.floor(Math.random() * 400 + 500)
+);
+
+const outgoing = labels.map(
+    () => Math.floor(Math.random() * 300 + 200)
+);
+
+const ctx = document.getElementById('trafficChart');
+
+const trafficChart = new Chart(ctx, {
+    type: 'line',
+
+    data: {
+        labels: labels,
+
+        datasets: [
+            {
+                label: 'Incoming',
+                data: incoming,
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59,130,246,0.12)',
+                fill: true,
+                tension: 0.4
+            },
+            {
+                label: 'Outgoing',
+                data: outgoing,
+                borderColor: '#22c55e',
+                backgroundColor: 'rgba(34,197,94,0.08)',
+                fill: true,
+                tension: 0.4
+            }
+        ]
+    },
+
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+
+        plugins: {
+            legend: {
+                labels: {
+                    color: '#94a3b8'
+                }
+            }
+        },
+
+        scales: {
+            x: {
+                ticks: { color: '#64748b' },
+                grid: { color: '#263247' }
+            },
+            y: {
+                beginAtZero: true,
+                ticks: { color: '#64748b' },
+                grid: { color: '#263247' }
+            }
+        }
+    }
+});
+
+
+// DEMO LIVE UPDATE
+
+function random(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function updateDashboard() {
+
+    const cpu = random(25, 85);
+    const ram = random(55, 80);
+    const disk = random(45, 60);
+
+    document.getElementById('cpuValue').textContent = cpu + '%';
+    document.getElementById('ramValue').textContent = ram + '%';
+    document.getElementById('diskValue').textContent = disk + '%';
+
+    document.getElementById('cpuBar').style.width = cpu + '%';
+    document.getElementById('ramBar').style.width = ram + '%';
+    document.getElementById('diskBar').style.width = disk + '%';
+
+    document.getElementById('requests').textContent =
+        random(18000, 35000).toLocaleString('en-US');
+
+    document.getElementById('latency').textContent =
+        random(12, 35) + ' ms';
+
+    const hit = random(94, 99);
+
+    document.getElementById('cacheRatio').textContent =
+        hit + '%';
+
+    document.getElementById('hit').textContent =
+        hit + '%';
+
+    document.getElementById('miss').textContent =
+        (100 - hit).toFixed(1) + '%';
+
+    incoming.shift();
+    outgoing.shift();
+
+    incoming.push(random(400, 1000));
+    outgoing.push(random(200, 700));
+
+    trafficChart.update('none');
+
+    document.getElementById('lastUpdate').textContent =
+        new Date().toLocaleTimeString();
+}
+
+updateDashboard();
+
+setInterval(updateDashboard, 3000);
+
+</script>
+
+</body>
+</html>
