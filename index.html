@@ -1,1 +1,569 @@
 
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Бабушки — система авторизации</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: #ffffff;
+    color: #172033;
+    font-family: Arial, sans-serif;
+    display: grid;
+    place-items: center;
+    padding: 25px;
+}
+
+.page {
+    width: min(1200px, 100%);
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 35px;
+    align-items: center;
+}
+
+/* ИЛЛЮСТРАЦИЯ */
+
+.scene {
+    position: relative;
+}
+
+.scene img {
+    width: 100%;
+    display: block;
+    border-radius: 20px;
+}
+
+/* КОМИКСНОЕ ОБЛАЧКО */
+
+.live-bubble {
+    position: absolute;
+    left: 50%;
+    bottom: 5%;
+    transform: translateX(-50%);
+    width: 80%;
+    padding: 15px 20px;
+    background: white;
+    border: 3px solid #222;
+    border-radius: 25px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 18px;
+    line-height: 1.3;
+    box-shadow: 0 5px 10px #0002;
+    transition: .2s;
+}
+
+.live-bubble small {
+    display: block;
+    color: #64748b;
+    font-size: 11px;
+    margin-bottom: 5px;
+}
+
+/* БЛОК АВТОРИЗАЦИИ */
+
+.login {
+    background: white;
+    border: 1px solid #e5e9f0;
+    border-radius: 22px;
+    padding: 35px;
+    box-shadow: 0 15px 50px #17203315;
+}
+
+.logo {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 20px;
+    border-radius: 18px;
+    background: #eaf1ff;
+    display: grid;
+    place-items: center;
+    font-size: 30px;
+}
+
+h1 {
+    text-align: center;
+    margin: 0 0 10px;
+    font-size: 27px;
+}
+
+.subtitle {
+    text-align: center;
+    color: #687386;
+    margin-bottom: 30px;
+    font-size: 14px;
+}
+
+.field {
+    margin-bottom: 18px;
+}
+
+label {
+    display: block;
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+input {
+    width: 100%;
+    height: 52px;
+    border: 1px solid #d9dee8;
+    border-radius: 11px;
+    padding: 0 15px;
+    font-size: 16px;
+    outline: none;
+}
+
+input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px #2563eb18;
+}
+
+.password-wrap {
+    position: relative;
+}
+
+.password-wrap input {
+    padding-right: 50px;
+}
+
+.eye {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: none;
+    font-size: 19px;
+    cursor: pointer;
+}
+
+.submit {
+    width: 100%;
+    height: 52px;
+    border: none;
+    border-radius: 11px;
+    background: #2563eb;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.submit:hover {
+    background: #1d4ed8;
+}
+
+/* РЕАКЦИЯ БАБУШЕК */
+
+.reaction {
+    margin-top: 20px;
+    min-height: 80px;
+    padding: 15px;
+    border-radius: 13px;
+    background: #f4f7ff;
+    border: 1px solid #e2eaff;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.avatar {
+    font-size: 28px;
+}
+
+.reaction strong {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 5px;
+}
+
+.reaction p {
+    margin: 0;
+    font-size: 13px;
+    color: #536078;
+    line-height: 1.4;
+}
+
+.note {
+    margin-top: 17px;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 11px;
+}
+
+@media(max-width: 850px) {
+    .page {
+        grid-template-columns: 1fr;
+        max-width: 550px;
+    }
+
+    .login {
+        padding: 25px;
+    }
+
+    .live-bubble {
+        font-size: 14px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<main class="page">
+
+    <!-- БАБУШКИ -->
+
+    <section class="scene">
+
+        <img src="babushki-comic.png"
+             alt="Три бабушки на лавочке">
+
+        <div class="live-bubble">
+
+            <small id="bubbleSpeaker">
+                Бабушки шепчутся
+            </small>
+
+            <span id="bubbleText">
+                Ну-ка, посмотрим, кто тут к нам пожаловал…
+            </span>
+
+        </div>
+
+    </section>
+
+
+    <!-- АВТОРИЗАЦИЯ -->
+
+    <section>
+
+        <form class="login" id="loginForm">
+
+            <div class="logo">🔐</div>
+
+            <h1>Вход в систему</h1>
+
+            <div class="subtitle">
+                Пожалуйста, авторизуйтесь
+            </div>
+
+
+            <div class="field">
+
+                <label for="username">Логин</label>
+
+                <input
+                    id="username"
+                    type="text"
+                    placeholder="Введите логин"
+                    autocomplete="username"
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label for="password">Пароль</label>
+
+                <div class="password-wrap">
+
+                    <input
+                        id="password"
+                        type="password"
+                        placeholder="Введите пароль"
+                        autocomplete="current-password"
+                    >
+
+                    <button
+                        class="eye"
+                        type="button"
+                        id="togglePassword"
+                    >◉</button>
+
+                </div>
+
+            </div>
+
+
+            <button class="submit" type="submit">
+                Войти
+            </button>
+
+
+            <!-- РЕАКЦИЯ -->
+
+            <div class="reaction" aria-live="polite">
+
+                <div class="avatar" id="reactionAvatar">
+                    👵🏻
+                </div>
+
+                <div>
+
+                    <strong id="reactionTitle">
+                        Бабушки на посту
+                    </strong>
+
+                    <p id="reactionText">
+                        Начните вводить логин или пароль.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="note">
+                Демонстрационная авторизация.
+                Данные никуда не отправляются.
+            </div>
+
+        </form>
+
+    </section>
+
+</main>
+
+
+<script>
+
+// ПОЛУЧАЕМ ЭЛЕМЕНТЫ
+
+const username = document.getElementById("username");
+const password = document.getElementById("password");
+
+const title = document.getElementById("reactionTitle");
+const text = document.getElementById("reactionText");
+const avatar = document.getElementById("reactionAvatar");
+
+const speaker = document.getElementById("bubbleSpeaker");
+const bubble = document.getElementById("bubbleText");
+
+
+// ФУНКЦИЯ РЕАКЦИИ БАБУШЕК
+
+function react(icon, who, message) {
+
+    avatar.textContent = icon;
+
+    title.textContent = who;
+
+    text.textContent = message;
+
+    speaker.textContent = who;
+
+    bubble.textContent = message;
+
+}
+
+
+// РЕАКЦИЯ НА ВВОД ДАННЫХ
+
+function reactToInput() {
+
+    const login = username.value.trim();
+
+    const pass = password.value;
+
+
+    // ЕСЛИ ВВОДИМ ПАРОЛЬ
+
+    if (
+        document.activeElement === password &&
+        pass.length > 0
+    ) {
+
+        const lower = pass.toLowerCase();
+
+
+        // ПРОСТОЙ ПАРОЛЬ
+
+        if (
+            ["qwerty", "123456", "password", "111111"]
+            .includes(lower)
+        ) {
+
+            return react(
+                "👵🏼",
+                "Бабушка Валя",
+                "Ой, пароль вводит " + pass +
+                "! Да это же все соседи знают!"
+            );
+
+        }
+
+
+        // КОРОТКИЙ ПАРОЛЬ
+
+        if (pass.length < 6) {
+
+            return react(
+                "👵🏻",
+                "Бабушка Зина",
+                "Ой, какой коротенький пароль! Кот лапой подберёт!"
+            );
+
+        }
+
+
+        // ДЛИННЫЙ ПАРОЛЬ
+
+        if (pass.length >= 12) {
+
+            return react(
+                "👵🏽",
+                "Бабушка Люба",
+                "Ничего себе пароль! Тут без очков не разобрать!"
+            );
+
+        }
+
+
+        return react(
+            "👵🏻",
+            "Бабушка Зина",
+            "Пароль секретный, а мы всё равно наблюдаем!"
+        );
+
+    }
+
+
+    // ЕСЛИ ВВОДИМ ЛОГИН
+
+    if (login.length > 0) {
+
+
+        // АНГЛИЙСКИЕ БУКВЫ
+
+        if (
+            /[a-z]/i.test(login) &&
+            !/[а-яё]/i.test(login)
+        ) {
+
+            return react(
+                "👵🏻",
+                "Бабушка Зина",
+                "Ой, по иностранному пишет, иноагент поди!"
+            );
+
+        }
+
+
+        // РУССКИЕ БУКВЫ
+
+        if (/[а-яё]/i.test(login)) {
+
+            return react(
+                "👵🏼",
+                "Бабушка Валя",
+                "О, по-нашему пишет! А фамилия какая?"
+            );
+
+        }
+
+
+        return react(
+            "👵🏽",
+            "Бабушка Люба",
+            "Цифирки вместо имени? Вот это загадка!"
+        );
+
+    }
+
+
+    react(
+        "👵🏻",
+        "Бабушки шепчутся",
+        "Ну-ка, посмотрим, кто тут к нам пожаловал…"
+    );
+
+}
+
+
+// СЛУШАЕМ ВВОД В РЕАЛЬНОМ ВРЕМЕНИ
+
+username.addEventListener("input", reactToInput);
+
+password.addEventListener("input", reactToInput);
+
+
+// РЕАКЦИЯ ПРИ ПЕРЕКЛЮЧЕНИИ ПОЛЕЙ
+
+username.addEventListener("focus", () => {
+
+    if (!username.value && !password.value) {
+
+        react(
+            "👵🏻",
+            "Бабушка Зина",
+            "Логинчик вводит… Смотрим внимательно!"
+        );
+
+    }
+
+});
+
+password.addEventListener("focus", () => {
+
+    if (!password.value) {
+
+        react(
+            "👵🏼",
+            "Бабушка Валя",
+            "А теперь секретики пошли!"
+        );
+
+    }
+
+});
+
+
+// ПОКАЗАТЬ / СКРЫТЬ ПАРОЛЬ
+
+document
+.getElementById("togglePassword")
+.addEventListener("click", () => {
+
+    password.type =
+        password.type === "password"
+        ? "text"
+        : "password";
+
+});
+
+
+// НАЖАТИЕ КНОПКИ ВХОДА
+
+document
+.getElementById("loginForm")
+.addEventListener("submit", event => {
+
+    event.preventDefault();
+
+    react(
+        "👵🏼",
+        "Бабушки переглянулись",
+        "Ой, уже войти собрался! А пропуск у тебя есть?"
+    );
+
+});
+
+</script>
+
+</body>
+</html>
+
